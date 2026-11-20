@@ -1,3 +1,19 @@
-﻿using Karin;
+using System.Net;
+using Karin.Http;
+using Karin.Samples;
 
-CustomTcpListener.Listen();
+if (args.Length == 0)
+{
+    Console.WriteLine("Usage: dotnet run -- server");
+    return;
+}
+
+if (args[0] == "server")
+{
+    var server = new HttpServer(ExampleRoutes.Handle);
+    server.Listen(IPAddress.Loopback, 13000);
+}
+else
+{
+    Console.WriteLine("Usage: dotnet run -- server");
+}
