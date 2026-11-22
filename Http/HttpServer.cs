@@ -24,9 +24,28 @@ public sealed class HttpServer
             {
                 Console.WriteLine("Waiting for connection..");
 
-                using var client = listener.AcceptTcpClient();
+                TcpClient client = listener.AcceptTcpClient();
                 Console.WriteLine("Connected!");
 
+                _ = Task.Run(() => HandleClient(client));
+            }
+        }
+        catch (SocketException exception)
+        {
+            Console.WriteLine("SocketException: {0}", exception);
+        }
+        finally
+        {
+            listener.Stop();
+        }
+    }
+
+    private void HandleClient(TcpClient client)
+    {
+        using (client)
+        {
+            try
+            {
                 using var stream = client.GetStream();
 
                 try
@@ -34,7 +53,7 @@ public sealed class HttpServer
                     HttpRequest? request = HttpRequestReader.Read(stream);
                     if (request is null)
                     {
-                        continue;
+                        return;
                     }
 
                     if (request.Body.Length > 0)
@@ -51,14 +70,10 @@ public sealed class HttpServer
                     HttpResponseWriter.Write(stream, response);
                 }
             }
-        }
-        catch (SocketException exception)
-        {
-            Console.WriteLine("SocketException: {0}", exception);
-        }
-        finally
-        {
-            listener.Stop();
+            catch (Exception exception)
+            {
+                Console.WriteLine("Client error: {0}", exception);
+            }
         }
     }
 }
