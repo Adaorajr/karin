@@ -50,7 +50,20 @@ public sealed class HttpServer
 
                 try
                 {
-                    HttpRequest? request = await HttpRequestReader.ReadAsync(stream);
+                    HttpRequest? request;
+                    using (var readTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
+                    {
+                        try
+                        {
+                            request = await HttpRequestReader.ReadAsync(stream, readTimeout.Token);
+                        }
+                        catch (OperationCanceledException) when (readTimeout.IsCancellationRequested)
+                        {
+                            Console.WriteLine("Request timed out.");
+                            return;
+                        }
+                    }
+
                     if (request is null)
                     {
                         return;

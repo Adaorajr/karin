@@ -5,7 +5,7 @@ namespace Karin.Http;
 
 public static class HttpRequestReader
 {
-    public static async Task<HttpRequest?> ReadAsync(NetworkStream stream)
+    public static async Task<HttpRequest?> ReadAsync(NetworkStream stream, CancellationToken cancellationToken)
     {
         byte[] bytes = new byte[255];
         using var requestBuffer = new MemoryStream();
@@ -15,7 +15,7 @@ public static class HttpRequestReader
 
         while (headersEnd < 0)
         {
-            int bytesRead = await stream.ReadAsync(bytes);
+            int bytesRead = await stream.ReadAsync(bytes.AsMemory(), cancellationToken);
             if (bytesRead == 0)
             {
                 return null;
@@ -53,7 +53,7 @@ public static class HttpRequestReader
         int bodyStart = headersEnd + 4;
         while (requestBuffer.Length - bodyStart < contentLength)
         {
-            int bytesRead = await stream.ReadAsync(bytes);
+            int bytesRead = await stream.ReadAsync(bytes.AsMemory(), cancellationToken);
             if (bytesRead == 0)
             {
                 return null;
