@@ -5,7 +5,7 @@ namespace Karin.Http;
 
 public static class HttpResponseWriter
 {
-    public static void Write(NetworkStream stream, HttpResponse response)
+    public static async Task WriteAsync(NetworkStream stream, HttpResponse response)
     {
         byte[] bodyBytes = Encoding.UTF8.GetBytes(response.Body);
 
@@ -20,7 +20,7 @@ public static class HttpResponseWriter
                    "\r\n";
 
         byte[] headerBytes = Encoding.ASCII.GetBytes(headers);
-        stream.Write(headerBytes, 0, headerBytes.Length);
-        stream.Write(bodyBytes, 0, bodyBytes.Length);
+        await stream.WriteAsync(headerBytes);
+        await stream.WriteAsync(bodyBytes);
     }
 }

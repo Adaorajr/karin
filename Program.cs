@@ -11,7 +11,7 @@ if (args.Length == 0)
 if (args[0] == "server")
 {
     var server = new HttpServer(ExampleRoutes.Handle);
-    server.Listen(IPAddress.Loopback, 13000);
+    await server.ListenAsync(IPAddress.Loopback, 13000);
 }
 else
 {

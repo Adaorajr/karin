@@ -12,7 +12,7 @@ public sealed class HttpServer
         _handleRequest = handleRequest;
     }
 
-    public void Listen(IPAddress address, int port)
+    public async Task ListenAsync(IPAddress address, int port)
     {
         var listener = new TcpListener(address, port);
 
@@ -24,10 +24,10 @@ public sealed class HttpServer
             {
                 Console.WriteLine("Waiting for connection..");
 
-                TcpClient client = listener.AcceptTcpClient();
+                TcpClient client = await listener.AcceptTcpClientAsync();
                 Console.WriteLine("Connected!");
 
-                _ = Task.Run(() => HandleClient(client));
+                _ = HandleClientAsync(client);
             }
         }
         catch (SocketException exception)
@@ -40,7 +40,7 @@ public sealed class HttpServer
         }
     }
 
-    private void HandleClient(TcpClient client)
+    private async Task HandleClientAsync(TcpClient client)
     {
         using (client)
         {
@@ -50,7 +50,7 @@ public sealed class HttpServer
 
                 try
                 {
-                    HttpRequest? request = HttpRequestReader.Read(stream);
+                    HttpRequest? request = await HttpRequestReader.ReadAsync(stream);
                     if (request is null)
                     {
                         return;
@@ -62,12 +62,12 @@ public sealed class HttpServer
                     }
 
                     HttpResponse response = _handleRequest(request);
-                    HttpResponseWriter.Write(stream, response);
+                    await HttpResponseWriter.WriteAsync(stream, response);
                 }
                 catch (InvalidDataException)
                 {
                     var response = new HttpResponse("HTTP/1.1 400 Bad Request", "", null);
-                    HttpResponseWriter.Write(stream, response);
+                    await HttpResponseWriter.WriteAsync(stream, response);
                 }
             }
             catch (Exception exception)
