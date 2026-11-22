@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>Karin.HttpServer</PackageId>
+    <Version>0.1.0-preview.1</Version>
+    <Authors>Adaorajr</Authors>
+    <Description>A small HTTP/1.1 server in C# built to learn networking and protocols.</Description>
+    <PackageProjectUrl>https://github.com/Adaorajr/karin</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Adaorajr/karin.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>http server csharp learning</PackageTags>
+    <PackageReleaseNotes>First preview release with an HTTP/1.1 server and basic routing.</PackageReleaseNotes>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="../../README.md" Pack="true" PackagePath="/" />
+    <None Include="../../LICENSE" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+</Project>
