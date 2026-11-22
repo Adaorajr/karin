@@ -1,19 +1,13 @@
 using System.Net;
+using Karin;
 using Karin.Http;
-using Karin.Samples;
 
-if (args.Length == 0)
-{
-    Console.WriteLine("Usage: dotnet run -- server");
-    return;
-}
+var app = new KarinApp();
 
-if (args[0] == "server")
-{
-    var server = new HttpServer(ExampleRoutes.Handle);
-    await server.ListenAsync(IPAddress.Loopback, 13000);
-}
-else
-{
-    Console.WriteLine("Usage: dotnet run -- server");
-}
+app.MapGet("/", _ => new HttpResponse("HTTP/1.1 200 OK", "Olá!"));
+
+app.MapPost<EchoRequest>("/echo", request => request.Message is null
+    ? new HttpResponse("HTTP/1.1 400 Bad Request", "The message field is required.")
+    : new HttpResponse("HTTP/1.1 200 OK", request.Message));
+
+await app.RunAsync(IPAddress.Loopback, 13000);

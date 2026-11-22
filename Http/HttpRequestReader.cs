@@ -10,7 +10,6 @@ public static class HttpRequestReader
         byte[] bytes = new byte[255];
         using var requestBuffer = new MemoryStream();
 
-        string requestText = "";
         int headersEnd = -1;
 
         while (headersEnd < 0)
@@ -21,12 +20,25 @@ public static class HttpRequestReader
                 return null;
             }
 
+            int previousLength = (int)requestBuffer.Length;
             requestBuffer.Write(bytes, 0, bytesRead);
-            requestText = Encoding.ASCII.GetString(requestBuffer.ToArray());
-            headersEnd = requestText.IndexOf("\r\n\r\n", StringComparison.Ordinal);
+
+            byte[] bufferedBytes = requestBuffer.GetBuffer();
+            int bufferedLength = (int)requestBuffer.Length;
+            for (int index = Math.Max(0, previousLength - 3); index <= bufferedLength - 4; index++)
+            {
+                if (bufferedBytes[index] == '\r' &&
+                    bufferedBytes[index + 1] == '\n' &&
+                    bufferedBytes[index + 2] == '\r' &&
+                    bufferedBytes[index + 3] == '\n')
+                {
+                    headersEnd = index;
+                    break;
+                }
+            }
         }
 
-        string headersText = requestText[..headersEnd];
+        string headersText = Encoding.ASCII.GetString(requestBuffer.GetBuffer(), 0, headersEnd);
         string[] headerLines = headersText.Split("\r\n");
         string[] firstLine = headerLines[0].Split(' ');
 
@@ -65,8 +77,7 @@ public static class HttpRequestReader
         string body = "";
         if (contentLength > 0)
         {
-            byte[] requestBytes = requestBuffer.ToArray();
-            body = Encoding.UTF8.GetString(requestBytes, bodyStart, contentLength);
+            body = Encoding.UTF8.GetString(requestBuffer.GetBuffer(), bodyStart, contentLength);
         }
 
         string method = firstLine[0];
